@@ -19,7 +19,7 @@ La aplicacion con la que se desarrollara dicho sistema, es una **ASP.NET Core we
 
 La aplicacion va a comunicarse con la API atraves de los endpoint que se solicitaran atraves del SWAGGER o POSTMAN. A continuacion presentare lo hecho para la primera iteracion del proyecto.
 
-1. **Lo primero que habia que hacer era registrar vinos con sus detalles:**
+1) **Lo primero que habia que hacer era registrar vinos con sus detalles:**
 
    Lo que hice fue realizar un DTO para que el usuario cuando solicite registrar un nuevo vino, le pase los datos de      las propiedades que ingreso el usuario.
 
@@ -129,7 +129,7 @@ public List<WineEntity> RegisterNewWine(RegisterNewWineDto RegisterWineDto)
       }
       ```
       
-2. **Lo segundo que habia que hacer era consultar el inventario actual para ver los vinos disponibles y sus cantidades:**
+2) **Lo segundo que habia que hacer era consultar el inventario actual para ver los vinos disponibles y sus cantidades:**
 
    A partir de que la propiedad stock tenia que ser mayor que 0 en el WineEntity, filtre utilizando LINQ en el 
    WineService que me traiga los vinos que esten disponibles, que tengan el stock mayor que 0.
@@ -176,11 +176,13 @@ public IActionResult GetWineAvailability()
    stock.
 
    **Posibles errores:**
+   
       1. Que el nombre de usuario este vacio.
+      
       2.  Que la contraseña no supere al menos los 8 carecteres.
       
 
-3. **Como tercer y ultimo paso, habia que crear un usuario:**
+3) **Como tercer y ultimo paso, habia que crear un usuario:**
    
    Lo primero que hice fue crear el DTO, definir sus propiedades para cuando se solicite la creacion de ese nuevo 
    usuario, poder pasarle los datos al Userservice y asi poder guardar los datos en el repositorio.
