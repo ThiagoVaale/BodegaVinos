@@ -69,9 +69,11 @@ public List<WineEntity> RegisterNewWine(RegisterNewWineDto RegisterWineDto)
    **Ejemplo de uso:**
 
 **Registro de vino con sus detalles**
-   --> Endpoint: POST /api/Wine
 
+   --> Endpoint: POST /api/Wine
+   
    --> Request:
+   
    ```
    {
   "name": "Cabernet Sauvignon",
@@ -90,6 +92,7 @@ public List<WineEntity> RegisterNewWine(RegisterNewWineDto RegisterWineDto)
 ```
 
    --> Http: Ok(200)
+   
    --> **Endpoint** GET /api/Wine **Para corroborar registro exitoso**
 
    --> Body response:
@@ -121,49 +124,7 @@ public List<WineEntity> RegisterNewWine(RegisterNewWineDto RegisterWineDto)
   "error": "El año del vino tiene que estar entre 1990 y 2024"
 }
 
-**Consultar inventario de vinos disponibles**
-   --> Endpoint: GET /Vinos disponibles
-   --> Request:
-   
-   ```
-      {
-  "name": "Cabernet Sauvignon",
-  "variety": "Tinto",
-  "year": 2019,
-  "region": "Napa Valley",
-  "stock": 50
-}
-```
 
-   Al haber dos vinos registrados y solo devuelve uno, quiere decir que de la otra variedad de vino, no queda mas 
-   stock.
-
-**Crear un usuario:**
-   --> Endpoint: POST /api/User
-   --> Request:
-
-   ```
-   {
-  "username": "usuarioNuevo",
-  "password": "contraseña123"
-}
-```
-
-   Http: Ok(200)
-
-   -->Body Response:
-
-   ```
-     {
-  "username": "usuarioNuevo",
-  "password": "contraseña123"
-}
-```
-
-   **Posibles errores:**
-   1. Que el nombre de usuario este vacio.
-   2. Que la contraseña no supere al menos los 8 carecteres.
-   
 2. **Lo segundo que habia que hacer era consultar el inventario actual para ver los vinos disponibles y sus cantidades:**
 
    A partir de que la propiedad stock tenia que ser mayor que 0 en el WineEntity, filtre utilizando LINQ en el 
@@ -191,7 +152,31 @@ public IActionResult GetWineAvailability()
 }
 ```
 
+**Ejemplo de uso:**
+   --> Endpoint: GET /Vinos disponibles
+   
+   --> Request:
+   
+   ```
+      {
+  "name": "Cabernet Sauvignon",
+  "variety": "Tinto",
+  "year": 2019,
+  "region": "Napa Valley",
+  "stock": 50
+}
+```
+
+   Al haber dos vinos registrados y solo devuelve uno, quiere decir que de la otra variedad de vino, no queda mas 
+   stock.
+
+   **Posibles errores:**
+   1. Que el nombre de usuario este vacio.
+   2. Que la contraseña no supere al menos los 8 carecteres.
+   
+
 3. **Como tercer y ultimo paso, habia que crear un usuario:**
+   
    Lo primero que hice fue crear el DTO, definir sus propiedades para cuando se solicite la creacion de ese nuevo 
    usuario, poder pasarle los datos al Userservice y asi poder guardar los datos en el repositorio.
    
@@ -237,3 +222,30 @@ public IActionResult createUser(CreateUserDto newUser)
     return Ok(_userService.createUser(newUser));
 }
 ```
+
+**Ejemplo de uso:**
+
+
+   --> Endpoint: POST /api/User
+   
+   --> Request:
+
+   ```
+   {
+  "username": "usuarioNuevo",
+  "password": "contraseña123"
+}
+```
+
+   Http: Ok(200)
+
+   -->Body Response:
+
+   ```
+     {
+  "username": "usuarioNuevo",
+  "password": "contraseña123"
+}
+```
+
+
