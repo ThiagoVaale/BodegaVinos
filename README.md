@@ -38,7 +38,7 @@ public List<WineEntity> RegisterNewWine(RegisterNewWineDto RegisterWineDto)
     return _winesRepository.Wines;
 }
 ```
-   Luego de la asignacion a cada propiedad del vino, agrege al repositorio ese vino registrado y luego retorne a la 
+   Luego de la asignacion a cada propiedad del vino, agregue al repositorio ese vino registrado y luego retorne a la 
    lista del repositorio la cual se habia agregado ese registro.
    
    Luego, habia que recibir esa peticion por el controlador, lo cual utilice un HttpPost que nos permite hacer la 
