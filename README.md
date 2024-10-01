@@ -1,4 +1,5 @@
 **BODEGA DE VINOS**
+
 Esta aplicacion consiste en realizar un sistema simple de gestion de inventario. El sistema debe permitir **Registar vinos**, **Actualizar costos**, **Consultar Inventario**.
 La aplicacion con la que se desarrollara dicho sistema, es una **ASP.NET Core web API**. Como gestion y almacenamiento de datos utilizaremos una base de datos SQL(SQLite).
 
