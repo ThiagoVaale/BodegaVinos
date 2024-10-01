@@ -217,7 +217,7 @@ public IActionResult GetWineAvailability()
     return _userRepository.Users;
 }
 ```
-   En el Userservice lo que hice fue pasar los datos que viene por el DTO a las propiedades ya definidas de User. Luego utilizo la inyeccion que hice del userRepository en el               UserService para agregar a la lista, el user creado y retornar a esa lista actualizada.
+   En el Userservice lo que hice fue pasar los datos que viene por el DTO a las propiedades ya definidas de User. Luego utilizo la inyeccion que hice del userRepository en el UserService para agregar a la lista, el user creado y retornar a esa lista actualizada.
 
 
    Como ultimo paso, habia creer el endpoint en el controlador para recibir esa peticion:
