@@ -124,7 +124,6 @@ public List<WineEntity> RegisterNewWine(RegisterNewWineDto RegisterWineDto)
   "error": "El año del vino tiene que estar entre 1990 y 2024"
 }
 
-
 2. **Lo segundo que habia que hacer era consultar el inventario actual para ver los vinos disponibles y sus cantidades:**
 
    A partir de que la propiedad stock tenia que ser mayor que 0 en el WineEntity, filtre utilizando LINQ en el 
