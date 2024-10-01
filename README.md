@@ -22,6 +22,7 @@ presentare lo hecho para la primera iteracion del proyecto.
    Lo que hice fue realizar un DTO para que el usuario cuando solicite registrar un nuevo vino, le pase los datos de las propiedades que
    ingreso el usuario.
 
+```
 public List<WineEntity> RegisterNewWine(RegisterNewWineDto RegisterWineDto)
 {
     WineEntity wineRegister = new WineEntity()
@@ -35,13 +36,14 @@ public List<WineEntity> RegisterNewWine(RegisterNewWineDto RegisterWineDto)
     _winesRepository.Wines.Add(wineRegister);
     return _winesRepository.Wines;
 }
-
+```
    Luego de la asignacion a cada propiedad del vino, agrege al repositorio ese vino registrado y luego retorne a la lista del repositorio
    la cual se habia agregado ese registro.
 
    Luego, habia que recibir esa peticion por el controlador, lo cual utilice un HttpPost que nos permite hacer la creacion de un nuevo
    recurso.
 
+```
       [HttpPost]
      public IActionResult RegisterNewWine([FromBody] RegisterNewWineDto registerNewWineDto)
      {
@@ -58,7 +60,7 @@ public List<WineEntity> RegisterNewWine(RegisterNewWineDto RegisterWineDto)
              return Ok(_wineService.RegisterNewWine(registerNewWineDto));
          }
      }
-
+```
    Como se ve en el codigo, verifique que si registerNewWineDto.Name == null y registerNewWineDto.Year no estaba entre 1990 y 2024 devuelva una badRequest. La data notation de la            propiedad Year del DTO la cree yo, el nombre del vino era requerido.
 
    **Ejemplo de uso:**
@@ -67,6 +69,7 @@ public List<WineEntity> RegisterNewWine(RegisterNewWineDto RegisterWineDto)
    --> Endpoint: POST /api/Wine
 
    --> Request:
+   ```
    {
   "name": "Cabernet Sauvignon",
   "variety": "Tinto",
@@ -81,12 +84,14 @@ public List<WineEntity> RegisterNewWine(RegisterNewWineDto RegisterWineDto)
   "region": "Napa Valley",
   "stock": 0
 }
+```
 
    --> Http: Ok(200)
    --> **Endpoint** GET /api/Wine **Para corroborar registro exitoso**
 
    --> Body response:
-
+   
+```
       {
   "name": "Cabernet Sauvignon",
   "variety": "Tinto",
@@ -101,6 +106,7 @@ public List<WineEntity> RegisterNewWine(RegisterNewWineDto RegisterWineDto)
   "region": "Napa Valley",
   "stock": 0
 }
+```
 
    **Posibles Errores:**
    1. Si el nombre esta vacio:
@@ -114,7 +120,9 @@ public List<WineEntity> RegisterNewWine(RegisterNewWineDto RegisterWineDto)
 
 **Consultar inventario de vinos disponibles**
    --> Endpoint: GET /Vinos disponibles
-   --> Request: 
+   --> Request:
+   
+   ```
       {
   "name": "Cabernet Sauvignon",
   "variety": "Tinto",
@@ -122,24 +130,31 @@ public List<WineEntity> RegisterNewWine(RegisterNewWineDto RegisterWineDto)
   "region": "Napa Valley",
   "stock": 50
 }
+```
 
    Al haber dos vinos registrados y solo devuelve uno, quiere decir que de la otra variedad de vino, no queda mas stock.
 
 **Crear un usuario:**
    --> Endpoint: POST /api/User
    --> Request:
+
+   ```
    {
   "username": "usuarioNuevo",
   "password": "contraseña123"
 }
+```
 
    Http: Ok(200)
 
    -->Body Response:
+
+   ```
      {
   "username": "usuarioNuevo",
   "password": "contraseña123"
 }
+```
 
    **Posibles errores:**
    1. Que el nombre de usuario este vacio.
@@ -150,6 +165,7 @@ public List<WineEntity> RegisterNewWine(RegisterNewWineDto RegisterWineDto)
    A partir de que la propiedad stock tenia que ser mayor que 0 en el WineEntity, filtre utilizando LINQ en el WineService
    que me traiga los vinos que esten disponibles, que tengan el stock mayor que 0.
 
+```
     public List<WineEntity> GetAvailabilityWines()
  {
      {
@@ -157,21 +173,25 @@ public List<WineEntity> RegisterNewWine(RegisterNewWineDto RegisterWineDto)
      };
 
  }
+```
 
  Una vez en el controlador, tuve que llamar el get de una forma diferente, ya que para verificar que en el paso anterior que el vino
  se habia registrado de una forma exitosa, utilice un get, para que me traiga todos esos vinos registrados.
 
+```
  [HttpGet("/Vinos disponibles")]
 public IActionResult GetWineAvailability()
 {
     return Ok(_wineService.GetAvailabilityWines());
 }
+```
 
 3. **Como tercer y ultimo paso, habia que crear un usuario:**
    Lo primero que hice fue crear el DTO, definir sus propiedades para cuando se solicite la creacion de ese nuevo usuario, poder pasarle los datos al Userservice y asi poder guardar
    los datos en el repositorio.
 
    DTO:
+   ```
     public class CreateUserDto
  {
      public int Id { get; set; }
@@ -181,8 +201,10 @@ public IActionResult GetWineAvailability()
      [MinLength(8)]
      public string Password { get; set; }
  }
+```
 
    Despues de crear el DTO, hice la logica desde el UserService:
+```
    public List<UserEntity> createUser(CreateUserDto newUser)
 {
     UserEntity userCreate = new UserEntity()
@@ -194,14 +216,15 @@ public IActionResult GetWineAvailability()
     _userRepository.Users.Add(userCreate);
     return _userRepository.Users;
 }
-
+```
    En el Userservice lo que hice fue pasar los datos que viene por el DTO a las propiedades ya definidas de User. Luego utilizo la inyeccion que hice del userRepository en el               UserService para agregar a la lista, el user creado y retornar a esa lista actualizada.
 
 
    Como ultimo paso, habia creer el endpoint en el controlador para recibir esa peticion:
-
+```
    [HttpPost]
 public IActionResult createUser(CreateUserDto newUser)
 {
     return Ok(_userService.createUser(newUser));
 }
+```
