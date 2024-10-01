@@ -189,7 +189,7 @@ public IActionResult GetWineAvailability()
    
    DTO:
    
-   ```
+```
     public class CreateUserDto
  {
      public int Id { get; set; }
@@ -199,9 +199,9 @@ public IActionResult GetWineAvailability()
      [MinLength(8)]
      public string Password { get; set; }
  }
-   ```
+```
 
-   Despues de crear el DTO, hice la logica desde el UserService:
+  " Despues de crear el DTO, hice la logica desde el UserService:"
 
 ```
    public List<UserEntity> createUser(CreateUserDto newUser)
@@ -216,11 +216,11 @@ public IActionResult GetWineAvailability()
     return _userRepository.Users;
 }
 ```
-   En el Userservice lo que hice fue pasar los datos que viene por el DTO a las propiedades ya definidas de User. 
+  " En el Userservice lo que hice fue pasar los datos que viene por el DTO a las propiedades ya definidas de User. 
    Luego utilizo la inyeccion que hice del userRepository en el UserService para agregar a la lista, el user creado y 
    retornar a esa lista actualizada.
 
-   Como ultimo paso, habia creer el endpoint en el controlador para recibir esa peticion:
+   Como ultimo paso, habia creer el endpoint en el controlador para recibir esa peticion:"
 
 ```
    [HttpPost]
@@ -231,7 +231,6 @@ public IActionResult createUser(CreateUserDto newUser)
 ```
 
 **Ejemplo de uso:**
-
 
    --> Endpoint: POST /api/User
    
@@ -244,9 +243,9 @@ public IActionResult createUser(CreateUserDto newUser)
 }
 ```
 
-   Http: Ok(200)
+   "Http: Ok(200)
 
-   --> Body Response:
+   --> Body Response:"
 
 ```
 {
