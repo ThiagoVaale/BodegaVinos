@@ -176,11 +176,11 @@ public IActionResult GetWineAvailability()
    stock.
 
    **Posibles errores:**
-   "
-      1. Que el nombre de usuario este vacio.
+   
+      "1. Que el nombre de usuario este vacio."
       
-      2.  Que la contraseña no supere al menos los 8 carecteres.
-   "
+      "2.  Que la contraseña no supere al menos los 8 carecteres."
+   
 
 3) **Como tercer y ultimo paso, habia que crear un usuario:**
    
