@@ -15,7 +15,8 @@ La aplicacion con la que se desarrollara dicho sistema, es una **ASP.NET Core we
 4. **Ejcutar solucion en visual studio:**
    Abrir la solucion (.sln) en visual studio. Luego ejecutar la aplicacion haciendo clic en el boton verde, a la derecha de "plataformas de solucion".
    
-##Interactuar con la API
+**Interactuar con la API**
+
 La aplicacion va a comunicarse con la API atraves de los endpoint que se solicitaran atraves del SWAGGER o POSTMAN. A continuacion presentare lo hecho para la primera iteracion del proyecto.
 
 1. **Lo primero que habia que hacer era registrar vinos con sus detalles:**
