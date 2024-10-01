@@ -74,15 +74,15 @@ public List<WineEntity> RegisterNewWine(RegisterNewWineDto RegisterWineDto)
    
    --> Request:
    
-   ```
-   {
+```
+{
   "name": "Cabernet Sauvignon",
   "variety": "Tinto",
   "year": 2019,
   "region": "Napa Valley",
   "stock": 50
 },
-  {
+{
   "name": "Dv. Catena",
   "variety": "Tinto",
   "year": 2000,
@@ -98,14 +98,14 @@ public List<WineEntity> RegisterNewWine(RegisterNewWineDto RegisterWineDto)
    --> Body response:
    
 ```
-      {
+{
   "name": "Cabernet Sauvignon",
   "variety": "Tinto",
   "year": 2019,
   "region": "Napa Valley",
   "stock": 50
 },
-  {
+{
   "name": "Dv. Catena",
   "variety": "Tinto",
   "year": 2000,
@@ -125,7 +125,7 @@ public List<WineEntity> RegisterNewWine(RegisterNewWineDto RegisterWineDto)
    2. Si el año esta fuera del rango(1990-2024):
       ```
       {
-           "error": "El año del vino tiene que estar entre 1990 y 2024"
+      "error": "El año del vino tiene que estar entre 1990 y 2024"
       }
       ```
       
@@ -157,12 +157,13 @@ public IActionResult GetWineAvailability()
 ```
 
 **Ejemplo de uso:**
+
    --> Endpoint: GET /Vinos disponibles
    
    --> Request:
    
-   ```
-      {
+```
+{
   "name": "Cabernet Sauvignon",
   "variety": "Tinto",
   "year": 2019,
@@ -175,9 +176,9 @@ public IActionResult GetWineAvailability()
    stock.
 
    **Posibles errores:**
-   1. Que el nombre de usuario este vacio.
-   2. Que la contraseña no supere al menos los 8 carecteres.
-   
+      1. Que el nombre de usuario este vacio.
+      2.  Que la contraseña no supere al menos los 8 carecteres.
+      
 
 3. **Como tercer y ultimo paso, habia que crear un usuario:**
    
@@ -234,8 +235,8 @@ public IActionResult createUser(CreateUserDto newUser)
    
    --> Request:
 
-   ```
-   {
+```
+{
   "username": "usuarioNuevo",
   "password": "contraseña123"
 }
@@ -243,10 +244,10 @@ public IActionResult createUser(CreateUserDto newUser)
 
    Http: Ok(200)
 
-   -->Body Response:
+   --> Body Response:
 
-   ```
-     {
+```
+{
   "username": "usuarioNuevo",
   "password": "contraseña123"
 }
