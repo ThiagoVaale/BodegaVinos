@@ -260,6 +260,143 @@ public IActionResult createUser(CreateUserDto newUser)
 
    **SEGUNDA ITERACION**
 
+1) **Implementar base de datos con SQLite**:
 
+   Como PRIMER instancia lo que hice fue configurar el appseting.json para la conexion con la base de datos. Esto
+   nos vas a servir para que una vez tengamos el appsettings.json configurado, desde el program, podamos ejecutar esa
+   misma configuracion. No solamente configurar, si no tambien configurar el contexto. El appsettings.json y el       
+   program.cs se ven asi:
+
+   **appsettings.json**
+
+   ```
+    "AllowedHosts": "*",
+    "ConnectionStrings": {
+      "WinesAPIDBConnectionString": "Data Source=WineDbContext.db" 
+     }
+    ```
+
+   **Program.cs**
+
+    ```
+    builder.Services.AddDbContext<WineDbContext>(dbContextOptions => dbContextOptions.UseSqlite(
+    builder.Configuration["ConnectionStrings:WinesAPIDBConnectionString"]));
+    ```
+
+    Luego, cree el contexto de la base de datos. El contexto es el puente de comunicacion entre la aplicacion y la         base de datos utilizada. Las tablas que querramos que se vean reflejadas en la Base de datos, las representaremos      con **DbSet**<>.
+
+     ```
+   public class WineDbContext : DbContext
+    {
+    //Aca se va a definir la tabla de vinos, users, cata dentro de la base de datos.
+    public **DbSet**<WineEntity> Wines { get; set; }
+    public **DbSet**<UserEntity> Users { get; set; }
+    public **DbSet**<CataEntity> Catas { get; set; }
+
+    //Constructor que recibe las opciones desde el program.cs y los data sets de las entidades que queremos guardar en     la base de datos.
+    public WineDbContext(DbContextOptions<WineDbContext> options) : base(options)
+    {
+        
+    }
+     ```
+
+     En el codigo anteriormente proporcionado es donde se registra el contexto para que EFC lo utilice.
+
+2) **Agregar Repositorios**:
+
+   Una vez que hice la configuracion y conexion referida al appsettings.json, program.cs y DbContext, debia cambiar
+   el repositorio hardcodeado.
+   Como primera instancia inyecte el DbContext en el repositorio para una mejor separacion de responsabilidades,       
+   facilidad de prueba, persistencia, etc. Como consecuencia de haber cambiado el repositorio, tuve que cambiar la   
+   logica en la que estaba hecho el WineService, inyectando el WineRepository. que es quien va a consultar a la base      de datos.
+
+   **WineRepository**
+
+     ```
+    private readonly WineDbContext _wineDbContext;
+
+    public WinesRepository(WineDbContext wineDbContext)
+     {
+       _wineDbContext = wineDbContext;
+     }
+      ```
+
+     **WineService**
+   
+   ```
+     private readonly WinesRepository _wineRepository;
+     public WineService(WinesRepository wineRepository)
+     {
+         _wineRepository = wineRepository;
+     }
+   ```
+
+3) **Autenticación con JWT**:
+
+   Al trabajar con Autenticacion, lo que hice fue crear un archivo AuthenticateController.cs en la carpeta de             Controller. Es donde vamos a validar credenciales y generar el token.
+
+   Lo primero que hice fue inyectar el UserService en el AuthenticateController.cs, ¿Por que UserService? porque es el    service quien va a consultar a la base de datos si las credenciales son correctas, para luego dar lugar a la     
+   creacion del token. Tambien inyecte una interfaz de IConfiguration que es donde nosotros vamos a traer la llave 
+   secreta de nuestra API desde el appsetting.json, recordemos que esa llave la conoce SOLO la API. El codigo se ve 
+   asi:
+
+   ```
+
+   {
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AuthenticateController : ControllerBase
+    {
+        private readonly UserService _userService;
+        private readonly IConfiguration _config;
+        public AuthenticateController(UserService userService, IConfiguration config)
+        {
+            _userService = userService;
+            _config = config;
+        }
+
+        [HttpPost]
+        public IActionResult Authenticate([FromBody] CredentialsAuthenticateDTO credentialDto)
+        {
+            //Validamos las credenciales recibidad por el DTO de la request utilizando el metodo creado en UserService,
+            //que se contacta con el repositorio y comprueba credenciales.
+            UserEntity userAuthenticate = _userService.AuthenticateUser(credentialDto.Username, credentialDto.Password);
+            if(userAuthenticate is not null)
+            {
+                //Estas dos primeras lineas de la generacion del token, es el: SIGNATURE.
+                var securityPassword = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_config["Authentication:SecretForKey"])); //Traemos la SecretKey del Json;
+
+                //Donde agarra el header + payload + secretkey(se encuentra en el appsettingJSON) y a todo ESTO lo HASHEA.
+                SigningCredentials signature = new SigningCredentials(securityPassword, SecurityAlgorithms.HmacSha256);
+
+                //Los claims son datos en clave->valor que nos permite guardar data del usuario.
+                var claimsForToken = new List<Claim>();
+                claimsForToken.Add(new Claim("sub", userAuthenticate.Id.ToString())); //"sub" es una key estándar que significa unique user identifier, es decir, si mandamos el id del usuario por convención lo hacemos con la key "sub".
+                claimsForToken.Add(new Claim("given_name", userAuthenticate.Username)); //Lo mismo para given_name y family_name, son las convenciones para nombre y apellido. Ustedes pueden usar lo que quieran, pero si alguien que no conoce la app
+
+                var jwtSecurityToken = new JwtSecurityToken(//Acá es donde se crea el token con toda la data que le pasamos antes.
+                  _config["Authentication:Issuer"], //ISSUER Y AUDIENCE valores que estan en el appsettingJSON.
+                  _config["Authentication:Audience"],
+                  claimsForToken, //Objeto que definimos arriba, llamdas CLAIMS(CLAVE : VALOR)
+                  DateTime.UtcNow, //Fecha de creacion del token
+                  DateTime.UtcNow.AddHours(1), //Fecha de expiracion del token
+                  signature); //La firma del token
+
+                string tokenToReturn = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken); //Aca se encuentra el token
+                return Ok(tokenToReturn);
+            }
+            return Unauthorized();
+        } 
+    }
+
+    ```
+
+   
+
+   
+   
+   
+
+   
 
 
