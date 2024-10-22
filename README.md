@@ -337,9 +337,11 @@ public IActionResult createUser(CreateUserDto newUser)
 
    Lo primero que hice fue inyectar el UserService en el AuthenticateController.cs, ¿Por que UserService? porque es el    service quien va a consultar a la base de datos si las credenciales son correctas, para luego dar lugar a la     
    creacion del token. Tambien inyecte una interfaz de IConfiguration que es donde nosotros vamos a traer la llave 
-   secreta de nuestra API desde el appsetting.json, recordemos que esa llave la conoce SOLO la API. El codigo se ve 
+   secreta de nuestra API desde el appsetting.json, recordemos que esa llave la conoce SOLO la API. Como hay que          recibir datos de la request, cree un dto donde voy a recibir el **username** y **password** El codigo se ve 
    asi:
 
+  **AuthenticateController:**
+  
    ```
 
    {
@@ -391,7 +393,188 @@ public IActionResult createUser(CreateUserDto newUser)
 
     ```
 
-   Comentarios sobre
+   Aca es donde se define todo lo referido a la creacion del token en caso de que las credenciales sean correctas.
+   Recordemos que el token esta generado por 3 partes: Header + payload + signature. **¿Como verifica la API, en caso     de venir un token ya validado si es correcto?** Lo que hace es desglosar ese token, ¿Como? diviendo al token en 3      partes, header + payload + signature(firma del token que lo tiene solo la API) y a todo eso lo hashea. Si el       
+   resultado es igual al token que llego, verifica que ese token no fue tocado, adulterado.
+
+4) **CONSULTAR POR VARIEDAD DE VINO**:
+
+  Cree un endpoint [HttpGet({"variety})] que es donde vamos a recibir el dato por la ruta de la request. Este endpoint
+  se conectara con el WineService donde este le consultara al WineRepository la consulta del vino atraves de esa         variedad. Es importante pasarle como parametro el tipo que vamos a recibir por ruta.
+
+  WineController:
+
+        ```
+        [HttpGet("{variety}")]
+        public IActionResult VarietyWines([FromRoute] string variety)
+        {
+            return Ok(_wineService.VarietyWines(variety));
+        }
+        ```
+
+  WineService:
+
+     ```
+     public List<WineEntity> VarietyWines(string variety)
+     {
+         return _wineRepository.VarietyWines(variety);
+     }
+        ```
+
+  WineRepository:
+
+   ```
+    public List<WineEntity> VarietyWines(string variety)
+    {
+        return _wineDbContext.Wines.Where(v => v.Variety.Contains(variety)).ToList();
+    }
+        ```
+
+    Importante: La busqueda en la base de datos la realice mediante LINQ, obteniendo los vinos que CONTENGAN la            palabra obtenida por ruta en la request.
+
+
+5) **ACTUALIZAR STOCK POR ID**:
+
+   Atraves de un [HttpPut("{idWineForUpdate}/stock")] fue donde cree el metodo que recibiria la request. ¿Por que un      HttpPut? Como el item nos pedia la actualizacion por Id, lo que lograriamos con el HttpPUt es exactamente eso, ya      que con este verbo lo que hacemos es la actualizacion parcial de "X" recurso. Recibimos el Id por ruta y el nuevo      stock por ruta. 
+
+  **WineController**:
+  
+ ```
+  [HttpPut("{idWineForUpdate}/stock")]
+  public IActionResult UpdateWineStock([FromRoute]int idWineForUpdate, [FromBody] int newStock)
+  {
+      try
+      {
+          return Ok(_wineService.UpdateWineStock(idWineForUpdate, newStock));
+      }
+      catch (WineException error)
+      {
+          return BadRequest(error.Message);
+      }
+      
+  }
+ ```
+
+**WineService**:
+```
+ public WineEntity? UpdateWineStock(int idWineForUpdate, int newStock)
+ {
+     WineEntity? updateWineId = _wineRepository.UpdateWineStock(idWineForUpdate, newStock);
+
+     if (updateWineId == null)
+     {
+         throw new WineException($"El id {idWineForUpdate} no EXISTE");
+     }
+     else
+     {
+         return _wineRepository.UpdateWineStock(idWineForUpdate, newStock);
+     }
+    
+ }
+
+```
+
+El metodo retorna un WineEntity? ya que el valor del metodo puede ser NULL, por eso es que con ? permitimos que la funcion devuelva dicho valor. En el Service es donde vamos a recibir el valor del repositorio, ya sea null o contenga
+la actualizacion de "X" vino. Haciendo un bloque if dependiendo del valor recibido, devolvemos mensaje aclaratorio o los datos verificados en la base de datos.
+
+**WineRepository**:
+
+```
+  public WineEntity? UpdateWineStock(int idWineForUpdate, int newStock)
+  {
+      WineEntity? idWineUpdate = _wineDbContext.Wines.FirstOrDefault(i => i.Id == idWineForUpdate);
+
+      if (idWineUpdate == null)
+      {
+          return null;
+      }
+
+      idWineUpdate.Stock = newStock;
+
+      _wineDbContext.Wines.Update(idWineUpdate);
+      _wineDbContext.SaveChanges();
+      return idWineUpdate;
+  }
+```
+Lo que hice fue una busqueda atraves LINQ para ver si existia dicho ID. Si la variable "idWineUpdate" devolvia null, retornaba a null. Si no, asignaba el stock del id a newStock(pasado por body). Luego actualice el valor del stock, guarde los cambios(IMPORTANTE) y retorne al idWineUpdate;
+
+   --> **POSIBLES ERRORES**:
+       **QUE EL ID SEA NULO/NO EXISTA**:
+    ```
+      if (updateWineId == null)
+  {
+      throw new WineException($"El id {idWineForUpdate} no EXISTE");
+  }
+
+    ```
+
+    Como se ve, hay un WineExeption donde devuelvo un mensaje de erro. Eso lo cree para que cuando haya un error,          poder enviar un mensaje aclaratorio a la response. Lo que hice fue crear un archivo "WineExeption" en la carpeta       Exeption.
+    
+  ```
+        public class WineException : Exception
+    {
+        public WineException(string message) : base(message)
+        {
+
+        }
+    }
+   ```
+
+6) **AGREGAR ENTIDAD CATA**:
+
+   .Entidad Cata:
+   
+    ```
+     public class CataEntity
+  {
+      [Key]
+      [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+      public int IdTesting { get; set; }
+      public string Date { get; set; }
+      public string Name { get; set; }
+      public List<WineEntity> Wines { get; set; } = new List<WineEntity>(); //Voy a configurar una relacion de 1 : N         donde el 1 es la cata y el N los vinos.
+      public List<string> InvitedPeople { get; set; } = new List<string>();
+  }
+
+     ```
+
+     .Como segundo paso agregue a la entidad Vino la relacion con la entidad CataEntity.
+     
+      ```
+     public CataEntity? Catas { get; set; }
+      ```
+
+      Definiendo CataEntity el tipo de retorno del metodo. Esto lo que nos permite, es aclarar la relacion que               queremos tener, 1 : N --> A que cada vino pertenece a la cata.
+
+      .En tercer lugar, tenemos que agregar al contexto, la nueva entidad creada para verla reflejada en la base de           datos:
+
+      ```
+        public DbSet<CataEntity> Catas { get; set; }
+      ```
+
+      .En cuarto lugar, definir la relacion con la que van a contar las dos tablas atraves de la clave foranea.
+
+       ```
+       protected override void OnModelCreating(ModelBuilder modelBuilder)
+ {
+     base.OnModelCreating(modelBuilder);
+
+     modelBuilder.Entity<CataEntity>()
+         .HasMany(c => c.Wines) // Una cata posee muchos vinos
+         .WithOne(v => v.Catas); // Un vino pertenece a una cata
+ }
+       ```
+      
+
+   
+
+  
+
+        
+
+
+
+
 
    
 
