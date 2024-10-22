@@ -343,7 +343,6 @@ public IActionResult createUser(CreateUserDto newUser)
   **AuthenticateController:**
   
    ```
-
    {
     [Route("api/[controller]")]
     [ApiController]
@@ -366,17 +365,17 @@ public IActionResult createUser(CreateUserDto newUser)
             if(userAuthenticate is not null)
             {
                 //Estas dos primeras lineas de la generacion del token, es el: SIGNATURE.
-                var securityPassword = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_config["Authentication:SecretForKey"])); //Traemos la SecretKey del Json;
+                var securityPassword = new                                                            symmetricSecurityKey(Encoding.ASCII.GetBytes(_config["Authentication:SecretForKey"])); //Traemos la SecretKey del Json;
 
-                //Donde agarra el header + payload + secretkey(se encuentra en el appsettingJSON) y a todo ESTO lo HASHEA.
+                //Donde agarra el header + payload + secretkey(se encuentra en el appsettingJSON) y a todo ESTO lo                     HASHEA.
                 SigningCredentials signature = new SigningCredentials(securityPassword, SecurityAlgorithms.HmacSha256);
 
                 //Los claims son datos en clave->valor que nos permite guardar data del usuario.
                 var claimsForToken = new List<Claim>();
-                claimsForToken.Add(new Claim("sub", userAuthenticate.Id.ToString())); //"sub" es una key estándar que significa unique user identifier, es decir, si mandamos el id del usuario por convención lo hacemos con la key "sub".
-                claimsForToken.Add(new Claim("given_name", userAuthenticate.Username)); //Lo mismo para given_name y family_name, son las convenciones para nombre y apellido. Ustedes pueden usar lo que quieran, pero si alguien que no conoce la app
+                claimsForToken.Add(new Claim("sub", userAuthenticate.Id.ToString())); //"sub" es una key estándar que                  significa unique user identifier, es decir, si mandamos el id del usuario por convención lo hacemos                    con la key "sub".
+                claimsForToken.Add(new Claim("given_name", userAuthenticate.Username)); //Lo mismo para given_name y                    family_name, son las convenciones para nombre y apellido. Ustedes pueden usar lo que quieran, pero si                  alguien que no conoce la app
 
-                var jwtSecurityToken = new JwtSecurityToken(//Acá es donde se crea el token con toda la data que le pasamos antes.
+                var jwtSecurityToken = new JwtSecurityToken(//Acá es donde se crea el token con toda la data que le                    pasamos antes.
                   _config["Authentication:Issuer"], //ISSUER Y AUDIENCE valores que estan en el appsettingJSON.
                   _config["Authentication:Audience"],
                   claimsForToken, //Objeto que definimos arriba, llamdas CLAIMS(CLAVE : VALOR)
@@ -384,13 +383,12 @@ public IActionResult createUser(CreateUserDto newUser)
                   DateTime.UtcNow.AddHours(1), //Fecha de expiracion del token
                   signature); //La firma del token
 
-                string tokenToReturn = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken); //Aca se encuentra el token
+                string tokenToReturn = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken); //Aca se encuentra                  el token
                 return Ok(tokenToReturn);
             }
             return Unauthorized();
         } 
     }
-
     ```
 
    Aca es donde se define todo lo referido a la creacion del token en caso de que las credenciales sean correctas.
