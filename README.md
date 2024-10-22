@@ -285,7 +285,7 @@ public IActionResult createUser(CreateUserDto newUser)
 
     Luego, cree el contexto de la base de datos. El contexto es el puente de comunicacion entre la aplicacion y la         base de datos utilizada. Las tablas que querramos que se vean reflejadas en la Base de datos, las representaremos      con **DbSet**<>.
 
-     ```
+```
    public class WineDbContext : DbContext
     {
     //Aca se va a definir la tabla de vinos, users, cata dentro de la base de datos.
@@ -294,11 +294,11 @@ public IActionResult createUser(CreateUserDto newUser)
     public **DbSet**<CataEntity> Catas { get; set; }
 
     //Constructor que recibe las opciones desde el program.cs y los data sets de las entidades que queremos guardar en     la base de datos.
-    public WineDbContext(DbContextOptions<WineDbContext> options) : base(options)
-    {
+      public WineDbContext(DbContextOptions<WineDbContext> options) : base(options)
+      {
         
-    }
-     ```
+      }
+```
 
      En el codigo anteriormente proporcionado es donde se registra el contexto para que EFC lo utilice.
 
@@ -312,14 +312,14 @@ public IActionResult createUser(CreateUserDto newUser)
 
    **WineRepository**
 
-     ```
+```
     private readonly WineDbContext _wineDbContext;
 
     public WinesRepository(WineDbContext wineDbContext)
      {
        _wineDbContext = wineDbContext;
      }
-      ```
+```
 
      **WineService**
    
@@ -342,7 +342,7 @@ public IActionResult createUser(CreateUserDto newUser)
 
   **AuthenticateController:**
   
-   ```
+```
    {
     [Route("api/[controller]")]
     [ApiController]
@@ -388,8 +388,8 @@ public IActionResult createUser(CreateUserDto newUser)
             }
             return Unauthorized();
         } 
-    }
-    ```
+      }
+```
 
    Aca es donde se define todo lo referido a la creacion del token en caso de que las credenciales sean correctas.
    Recordemos que el token esta generado por 3 partes: Header + payload + signature. **¿Como verifica la API, en caso     de venir un token ya validado si es correcto?** Lo que hace es desglosar ese token, ¿Como? diviendo al token en 3      partes, header + payload + signature(firma del token que lo tiene solo la API) y a todo eso lo hashea. Si el       
@@ -402,31 +402,31 @@ public IActionResult createUser(CreateUserDto newUser)
 
   WineController:
 
-        ```
+   ```
         [HttpGet("{variety}")]
         public IActionResult VarietyWines([FromRoute] string variety)
         {
             return Ok(_wineService.VarietyWines(variety));
         }
-        ```
+   ```
 
   WineService:
 
-     ```
+  ```
      public List<WineEntity> VarietyWines(string variety)
      {
          return _wineRepository.VarietyWines(variety);
      }
-        ```
+  ```
 
   WineRepository:
 
-   ```
+ ```
     public List<WineEntity> VarietyWines(string variety)
     {
         return _wineDbContext.Wines.Where(v => v.Variety.Contains(variety)).ToList();
     }
-        ```
+  ```
 
     Importante: La busqueda en la base de datos la realice mediante LINQ, obteniendo los vinos que CONTENGAN la            palabra obtenida por ruta en la request.
 
@@ -437,7 +437,7 @@ public IActionResult createUser(CreateUserDto newUser)
 
   **WineController**:
   
- ```
+```
   [HttpPut("{idWineForUpdate}/stock")]
   public IActionResult UpdateWineStock([FromRoute]int idWineForUpdate, [FromBody] int newStock)
   {
@@ -500,9 +500,9 @@ Lo que hice fue una busqueda atraves LINQ para ver si existia dicho ID. Si la va
        **QUE EL ID SEA NULO/NO EXISTA**:
     ```
       if (updateWineId == null)
-  {
+      {
       throw new WineException($"El id {idWineForUpdate} no EXISTE");
-  }
+      }
 
     ```
 
@@ -553,13 +553,13 @@ Lo que hice fue una busqueda atraves LINQ para ver si existia dicho ID. Si la va
 
        ```
        protected override void OnModelCreating(ModelBuilder modelBuilder)
- {
+       {
      base.OnModelCreating(modelBuilder);
 
      modelBuilder.Entity<CataEntity>()
          .HasMany(c => c.Wines) // Una cata posee muchos vinos
          .WithOne(v => v.Catas); // Un vino pertenece a una cata
- }
+       }
        ```
       
 
