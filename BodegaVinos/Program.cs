@@ -1,5 +1,10 @@
+using BodegaVinos.Data.Context;
 using BodegaVinos.Data.Repositories;
 using BodegaVinos.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,12 +13,54 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(setupAction =>
+{
+    setupAction.AddSecurityDefinition("WineAPI", new OpenApiSecurityScheme() //Esto va a permitir usar swagger con el token.
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        Description = "Acá pegar el token generado al loguearse."
+    });
 
-builder.Services.AddSingleton<WinesRepository>();
-builder.Services.AddSingleton<UserRepository>();
+    setupAction.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "WineAPI" } //Tiene que coincidir con el id seteado arriba en la definición
+                }, new List<string>() }
+    });
+});
+
+//Que tiene que chequear, como hacer ese chequeo:
+
+builder.Services.AddAuthentication("Bearer") //"Bearer" es el tipo de auntenticación que tenemos que elegir después en PostMan para pasarle el token
+    .AddJwtBearer(options => //Acá definimos la configuración de la autenticación. le decimos qué cosas queremos comprobar. La fecha de expiración se valida por defecto.
+    {
+        options.TokenValidationParameters = new()
+        {
+            ValidateIssuer = true, //Chequeo de quien creo el token.
+            ValidateAudience = true, //Chequeo sobre a quien va dirigido el token.
+            ValidateIssuerSigningKey = true, //Chequeo de la firma del token(Agarra el token que viene, lo desarma,
+                                             //agarra el header + el payload + el secreto de la API y lo hashee y
+                                             //lo compare contra la firma. Si es igual, entonces: ES UN TOKEN VALIDO.
+            ValidIssuer = builder.Configuration["Authentication:Issuer"],
+            ValidAudience = builder.Configuration["Authentication:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["Authentication:SecretForKey"]))
+        };
+    }
+);
+
+builder.Services.AddScoped<WinesRepository>();
+builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<WineService>();
 builder.Services.AddScoped<UserService>();
+
+builder.Services.AddDbContext<WineDbContext>(dbContextOptions => dbContextOptions.UseSqlite(
+    builder.Configuration["ConnectionStrings:WinesAPIDBConnectionString"]));
 
 var app = builder.Build();
 

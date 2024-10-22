@@ -1,9 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BodegaVinos.Entities
 {
     public class WineEntity
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         // El nombre del vino, requerido
@@ -50,5 +53,8 @@ namespace BodegaVinos.Entities
             if (Stock - amount < 0) throw new InvalidOperationException("No hay suficiente stock disponible.");
             Stock -= amount;
         }
+
+        //Relacion con la entidad CataEntity
+        public CataEntity? Catas { get; set; } // Atributo que hace referencia a que cada vino pertenece a una cata.
     }
 }

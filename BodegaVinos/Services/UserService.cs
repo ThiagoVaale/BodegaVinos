@@ -1,4 +1,5 @@
 ﻿using BodegaVinos.Common.Dtos;
+using BodegaVinos.Data.Context;
 using BodegaVinos.Data.Repositories;
 using BodegaVinos.Entities;
 
@@ -15,18 +16,17 @@ namespace BodegaVinos.Services
 
         public List<UserEntity> GetUser()
         {
-            return _userRepository.Users;
+            return _userRepository.GetUser();
         }
         public List<UserEntity> createUser(CreateUserDto newUser)
         {
-            UserEntity userCreate = new UserEntity()
-            {
-                Id = newUser.Id,
-                Username = newUser.Username,
-                Password = newUser.Password
-            };
-            _userRepository.Users.Add(userCreate);
-            return _userRepository.Users;
+           return _userRepository.createUser(newUser);
+        }
+
+        //Metodo para corroborar credenciales.
+        public UserEntity AuthenticateUser(string username, string password)
+        {
+           return _userRepository.AuthenticateUser(username, password);
         }
     }
 }

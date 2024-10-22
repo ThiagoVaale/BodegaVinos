@@ -1,9 +1,11 @@
 ﻿using BodegaVinos.Common.Dtos;
 using BodegaVinos.Data.Repositories;
 using BodegaVinos.Entities;
+using BodegaVinos.Exeptions;
 using BodegaVinos.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BodegaVinos.Controllers.Wine
 {
@@ -21,30 +23,46 @@ namespace BodegaVinos.Controllers.Wine
         [HttpGet]
         public IActionResult GetAllWines()
         {
-            return  Ok(_wineService.GetAllWines());
+            return Ok(_wineService.GetAllWines());
         }
 
-            [HttpGet("/Vinos disponibles")]
-            public IActionResult GetWineAvailability()
-            {
-                return Ok(_wineService.GetAvailabilityWines());
-            }
+        [HttpGet("/vinos-disponibles")]
+        public IActionResult GetWineAvailability()
+        {
+            return Ok(_wineService.GetAvailabilityWines());
+        }
+
+        [HttpGet("{variety}")]
+        public IActionResult VarietyWines([FromRoute] string variety)
+        {
+            return Ok(_wineService.VarietyWines(variety));
+        }
 
         [HttpPost]
         public IActionResult RegisterNewWine([FromBody] RegisterNewWineDto registerNewWineDto)
         {
-            if (registerNewWineDto.Name == null)
-            {
-                return BadRequest("El nombre del vino es OBLIGATORIO");
-            }
-            else if (registerNewWineDto.Year < 1990 || registerNewWineDto.Year > 2024)
-            {
-                return BadRequest("El año del vino tiene que estar entre 1990 y 2024");
-            }
-            else
+            try
             {
                 return Ok(_wineService.RegisterNewWine(registerNewWineDto));
+            } 
+            catch (WineException error)
+            {
+                return BadRequest(error.Message);
             }
+        }
+         
+        [HttpPut("{idWineForUpdate}/stock")]
+        public IActionResult UpdateWineStock([FromRoute]int idWineForUpdate, [FromBody] int newStock)
+        {
+            try
+            {
+                return Ok(_wineService.UpdateWineStock(idWineForUpdate, newStock));
+            }
+            catch (WineException error)
+            {
+                return BadRequest(error.Message);
+            }
+            
         }
     }   
 }
